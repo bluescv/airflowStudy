@@ -3,6 +3,9 @@
 Code that goes along with the Airflow tutorial located at:
 https://github.com/airbnb/airflow/blob/master/airflow/example_dags/tutorial.py
 """
+from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.python_operator import PythonOperator
+
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
 from datetime import datetime, timedelta
@@ -24,9 +27,15 @@ default_args = {
 
 dag = DAG('Test', default_args=default_args)
 
-# t1, t2 and t3 are examples of tasks created by instantiating operators
-t1 = BashOperator(
-    task_id='print_date',
-    bash_command='date',
-    dag=dag)
+with DAG('my_dag', start_date=datetime(2016, 1, 1)) as dag:
+    (
+        dag
+        >> DummyOperator(task_id='dummy_1')
+        >> BashOperator(
+            task_id='bash_1',
+            bash_command='echo "HELLO!"')
+        >> PythonOperator(
+            task_id='python_1',
+            python_callable=lambda: print("GOODBYE!"))
+    )
 
