@@ -44,13 +44,11 @@ with DAG('httpdag', start_date=datetime(2016, 1, 1), schedule_interval='*/1 * * 
             dag=dag)
     )
 
-
 def do_post():
     payload = {'key1': 'value1', 'key2': 'value2'}
     r = requests.post("http://localhost:8000", data=payload)
     print(r.text)
 
-
 def parse_get_result(response):
-    print("Inside parse_get_result")
-    return False
+    result = response.content.decode("UTF-8")
+    return True if "True" in result else False
