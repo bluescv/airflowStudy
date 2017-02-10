@@ -7,6 +7,7 @@ http://www.lifeba.org
 基于BaseHTTPServer的http server实现，包括get，post方法，get参数接收，post参数接收。
 '''
 import io
+import json
 import shutil
 import urllib
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -49,6 +50,8 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             print(params)
         # 指定返回编码
         enc = "UTF-8"
+
+        content = json.dumps({'errorcode': '0', 'msg': 'OK'})
         content = content.encode(enc)
         f = io.BytesIO()
         f.write(content)

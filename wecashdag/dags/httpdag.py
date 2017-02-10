@@ -54,3 +54,4 @@ def do_post(taskid):
 def parse_get_result(response):
     result = response.content.decode("UTF-8")
     return True if "True" in result else False
+
