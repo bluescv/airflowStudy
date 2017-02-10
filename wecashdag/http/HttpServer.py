@@ -21,7 +21,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
 
     def process(self, type):
 
-        content = "Google"
+        content = "True"
         if type == 1:  # post方法，接收post参数
             datas = self.rfile.read(int(self.headers['content-length']))
             datas = datas.decode("utf-8", 'ignore')  # 指定编码方式
@@ -35,17 +35,19 @@ class MyRequestHandler(BaseHTTPRequestHandler):
                     content += values + ';'
 
         if '?' in self.path:
-            query = urllib.splitquery(self.path)
-            action = query[0]
-
-            if query[1]:  # 接收get参数
-                queryParams = {}
-                for qp in query[1].split('&'):
-                    kv = qp.split('=')
-                    queryParams[kv[0]] = urllib.unquote(kv[1]).decode("utf-8", 'ignore')
-                    content += kv[0] + ':' + queryParams[kv[0]] + "\r\n"
-
-                    # 指定返回编码
+            # query = urllib.splitquery(self.path)
+            # action = query[0]
+            #
+            # if query[1]:  # 接收get参数
+            #     queryParams = {}
+            #     for qp in query[1].split('&'):
+            #         kv = qp.split('=')
+            #         queryParams[kv[0]] = urllib.unquote(kv[1]).decode("utf-8", 'ignore')
+            #         content += kv[0] + ':' + queryParams[kv[0]] + "\r\n"
+            self.queryString = urllib.parse.unquote(self.path.split('?', 1)[1])
+            params = urllib.parse.parse_qs(self.queryString)
+            print(params)
+        # 指定返回编码
         enc = "UTF-8"
         content = content.encode(enc)
         f = io.BytesIO()
