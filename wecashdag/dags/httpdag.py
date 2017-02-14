@@ -3,11 +3,11 @@ Code that goes along with the Airflow tutorial located at:
 https://github.com/airbnb/airflow/blob/master/airflow/example_dags/tutorial.py
 """
 from datetime import datetime, timedelta
-
-import requests
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from airflow.operators.sensors import HttpSensor
+from wecashdag.dags.batchjobenum import BatchJobEnum
+from wecashdag.dags.util import dagutil
 
 default_args = {
     'owner': 'airflow',
@@ -23,35 +23,36 @@ default_args = {
     # 'priority_weight': 10,
     # 'end_date': datetime(2016, 1, 1),
 }
-taskid = 'testtaskid1'
+
+# taskid = 'testtaskid1'
+
+taskid = dagutil.getseqnum(BatchJobEnum.JinShangMeltStatusCancel.value)
+payload = {'taskType': 1, 'scheduleNumber': taskid, 'capitalId': '1'}
 
 with DAG('httpdag', start_date=datetime(2016, 1, 1), schedule_interval='*/1 * * * *') as dag:
     (
         dag
         >> PythonOperator(
             task_id='python_1',
-            python_callable=lambda: do_post(taskid))
+            python_callable=lambda: dagutil.do_post(
+                "http://capital-dev.wecash.net/zfpt/batchjob/trigger/cancelCapitalMelt", payload))
         >> HttpSensor(
             task_id='http_sensor_check',
             http_conn_id='localtest',
             endpoint='',
-            params={"key1":taskid},
+            params={"taskType": "1", "scheduleNumber": taskid},
             # response_check=lambda response: True if "Google" in response.content else False,
-            response_check=lambda response: parse_get_result(response),
+            response_check=lambda response: dagutil.parse_get_result(response),
             poke_interval=5,
             timeout=30,
             dag=dag)
     )
 
+if __name__ == '__main__':
 
-def do_post(taskid):
-    payload = {'key1': taskid, 'key2': 'value2'}
-    r = requests.post("http://localhost:8000", data=payload)
-    print(r.text)
-    return True
+    try:
+        print("main")
+    except KeyboardInterrupt:
+        print("exception")
 
-
-def parse_get_result(response):
-    result = response.content.decode("UTF-8")
-    return True if "True" in result else False
-
+    pass
